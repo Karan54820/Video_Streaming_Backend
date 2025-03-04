@@ -1,0 +1,16 @@
+{
+  "name": "03.final_project",
+  "version": "1.0.0",
+  "description": "Complete Project for understanding and learning backend development",
+  "keywords": [
+    "javascript",
+    "backend"
+  ],
+  "license": "ISC",
+  "author": "Karan Yadav",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
