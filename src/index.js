@@ -6,8 +6,6 @@ dotenv.config({
     path: './env'
 });
 
-console.log('Environment Variables:', process.env.MONGODB_URI, process.env.DB_NAME);
-
 DBConnect()
 .then(()=>{
     app.listen(process.env.PORT || 8000,()=>{
