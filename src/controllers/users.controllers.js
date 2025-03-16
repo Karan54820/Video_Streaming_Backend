@@ -7,7 +7,7 @@ import ApiResponse from "../utils/ApiResponse.js";
 
 const genrateAcessandRefreshToken = async(userId) => {
     try {
-        const user = User.findById(userId);
+        const user = await User.findById(userId);
 
         const accessToken = user.generateAccessToken();
         const refreshToken = user.generateRefreshToken();
@@ -91,8 +91,10 @@ const loginUser = asyncHandler(async (req,res)=>{
     // genrate access and refresh token and send it to them
     // send in cookies
     const {email,username,password} = req.body;
+    console.log(req.body);
 
-    if(!username || !email){
+
+    if(!username && !email){
         throw new ApiError(400,"Please Enter your username or email")
     }
     const user = await User.findOne({
@@ -119,7 +121,7 @@ const loginUser = asyncHandler(async (req,res)=>{
     return res.
     status(200).
     cookie("accessToken",accessToken,options).
-    cookie("refreshToke",refreshToken,options).
+    cookie("refreshToken",refreshToken,options).
     json(
         new ApiResponse(
             201,
