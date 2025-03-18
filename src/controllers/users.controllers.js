@@ -203,4 +203,79 @@ const refreshAccessToken = asyncHandler(async(req,res)=>{
     
 })
 
-export {registerUser,loginUser,logoutUser,refreshAccessToken}
+const changeCurrentPassword = asyncHandler(async(req,res)=>{
+    const {oldpassword,newpassword} = req.body;
+
+    const user = await User.findById(req.user?._id);
+
+    if(!user){
+        throw new ApiError(401,"Unauthorized Access");
+    }
+
+    if(!await user.isPasswordCorrect(oldpassword)){
+        throw new ApiError(401,"Old Password Incorrect");
+    }
+
+    user.password = newpassword;
+
+    await user.save({validateBeforeSave:false})
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            "Password Changed Successfully"
+        )
+    )
+})
+
+const getCurrentUser = asyncHandler(async(req,res)=>{
+    const user = req?.user;
+
+    if(!user){
+        throw new ApiError(401,"No Current User");
+    }
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            "Current User fetched Successfully!!",
+            user
+        )
+    )
+})
+
+const changeusername = asyncHandler(async(req,res)=>{
+
+    const {newusername} = req.body;
+
+    if(!newusername){
+        throw new ApiError(401,"Please Provide a new username");
+    }
+
+    const user = await User.findById(req?.user?._id).select("-password -refreshToken");
+
+    if(!user){
+        throw new ApiError(401,"Unauthroized Access");
+    }
+
+    user.username = newusername;
+    await user.save({validateBeforeSave:false});
+
+    // const data = user.select("-password -refreshToken");
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            "Username Changed Successfully",
+            {
+                user
+            }
+        )
+    )
+})
+export {registerUser,loginUser,logoutUser,refreshAccessToken,changeCurrentPassword,getCurrentUser,changeusername}

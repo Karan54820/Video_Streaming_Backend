@@ -46,10 +46,14 @@ const userschema = new mongoose.Schema({
 },{timestamps:true})
 
 userschema.pre("save", async function (next) {
-    if(!this.isModified("password")) return next();
+    if (!this.isModified("password")) return next();
 
-    this.password = await bcrypt.hash(this.password, 10)
-    next()
+    if (!this.password) {
+        throw new Error("Password is required for hashing");
+    }
+
+    this.password = await bcrypt.hash(this.password, 10);
+    next();
 })
 
 userschema.methods.isPasswordCorrect = async function(password){
