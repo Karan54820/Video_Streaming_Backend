@@ -120,9 +120,9 @@ const loginUser = asyncHandler(async (req,res)=>{
     const loggedinUser = await User.findById(user._id).select("-password -refreshToken");
 
 
-    return res.
-    status(200).
-    cookie("accessToken",accessToken,options).
+    return res
+    .status(200)
+    .cookie("accessToken",accessToken,options).
     cookie("refreshToken",refreshToken,options).
     json(
         new ApiResponse(
@@ -278,4 +278,43 @@ const changeusername = asyncHandler(async(req,res)=>{
         )
     )
 })
-export {registerUser,loginUser,logoutUser,refreshAccessToken,changeCurrentPassword,getCurrentUser,changeusername}
+
+const changeAvatar = asyncHandler(async(req,res)=>{
+    console.log("Files received:", req.files);
+    console.log("Body received:", req.body);
+    
+    if(!req.files) {
+        throw new ApiError(400, "No files were uploaded");
+    }
+    
+    const newavatarpath = req.files?.newavatar?.[0]?.path;
+    
+    if(!newavatarpath){
+        throw new ApiError(404,"Please provide a newAvatar file");
+    }
+
+    const newavatar = await cloudinaryUploader(newavatarpath);
+
+    const user = await User.findById(req?.user?._id).select("-password -refreshToken");
+
+    if(!user){
+        throw new ApiError(401,"Unauthorized Access");
+    }
+
+    user.avatar=newavatar?.url;
+    await user.save({validateBeforeSave:false});
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            "Avatar updated successfully",
+            {
+                user,
+            }
+        )
+    )
+
+})
+export {registerUser,loginUser,logoutUser,refreshAccessToken,changeCurrentPassword,getCurrentUser,changeusername,changeAvatar}
