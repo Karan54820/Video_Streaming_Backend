@@ -2,7 +2,7 @@ import { response } from "express";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import ApiError from "../utils/ApiError.js"
 import {User} from "../models/user.models.js"
-import {cloudinaryUploader} from "../utils/cloudinary.js"
+import {cloudinaryUploader, deleteFileFromCloudinary} from "../utils/cloudinary.js"
 import ApiResponse from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
@@ -302,6 +302,8 @@ const changeAvatar = asyncHandler(async(req,res)=>{
         throw new ApiError(401,"Unauthorized Access");
     }
 
+    await deleteFileFromCloudinary(user.avatar); // Deletes old avatar from cloudinary
+
     user.avatar=newavatar?.url;
     await user.save({validateBeforeSave:false});
 
@@ -355,7 +357,9 @@ const getUserChannelProfile = asyncHandler(async(req,res)=>{
                 },
                 isSubscribed:{
                     $cond:{
-                        if:{$in :[req.user?._id,"$subscribers.subscriber"]}
+                        if:{$in :[req.user?._id,"$subscribers.subscriber"]},
+                        then:true,
+                        else:false
                     }
                 }
             }
